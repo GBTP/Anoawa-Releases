@@ -29,8 +29,14 @@ TAG="v$VERSION"
 [ -f "$APK_SRC" ] || die "找不到 APK：$APK_SRC"
 [ -f "$WIN_SRC" ] || die "找不到 Windows 包：$WIN_SRC"
 
-# Windows 包必须是解压即能跑的构建，缺 exe 说明选错了文件（比如传成了 APK）
-unzip -l "$WIN_SRC" | grep -q "Anoawa.exe" || die "$WIN_SRC 里没有 Anoawa.exe，确认是不是 Windows 构建"
+# Windows 包必须是解压即能跑的构建，缺 exe 说明选错了文件（比如传成了 APK）。
+#
+# 清单先读进变量再匹配，不要写成 unzip -l ... | grep -q ...：grep -q 一匹配上就退出并
+# 关掉管道，unzip 吃到 SIGPIPE 返回 141，pipefail 于是把整条管道判成失败——匹配明明
+# 成功了却报「没有 exe」。实测这个竞态大约一半概率触发，v1.1.2 发布时侥幸赢了，
+# v1.1.3 就卡住了。顺带把「压缩包读不了」和「包里没有 exe」分成两个错误。
+WIN_LIST="$(unzip -l "$WIN_SRC")" || die "读不了 $WIN_SRC，压缩包可能损坏或不是 zip"
+grep -q "Anoawa.exe" <<<"$WIN_LIST" || die "$WIN_SRC 里没有 Anoawa.exe，确认是不是 Windows 构建"
 
 gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1 && die "$TAG 已存在。要重发先 gh release delete $TAG --repo $REPO"
 
