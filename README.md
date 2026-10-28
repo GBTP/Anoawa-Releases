@@ -51,6 +51,10 @@ Get-FileHash Anoawa-Android.apk -Algorithm SHA256
 | 标题 | `Anoawa v1.1.2` |
 | Android 资产 | `Anoawa-Android.apk` |
 | Windows 资产 | `Anoawa-Windows-x64.zip` |
+| 更新日志 | `notes/<版本>.md`，以 `## 更新内容` 开头 |
+
+更新日志是给人看的，按「谱面 / 上架审核 / 界面与特效 / 其他」分组，一条一行，
+写玩家能感知到的变化，不要贴 commit 标题。脚本会把它原样放在下载表格前面。
 
 不要发布 Unity 产出的 `*_BurstDebugInformation_DoNotShip/`——那是调试符号，
 名字里已经写了别发。
@@ -58,8 +62,11 @@ Get-FileHash Anoawa-Android.apk -Algorithm SHA256
 发布用 `scripts/publish.sh`，它负责改名、算校验和、建 release：
 
 ```bash
-scripts/publish.sh 1.1.2 ~/Desktop/build/AnoawaV1.1.2.Apk ~/Desktop/build/AnoawaV1.1.2.zip
+scripts/publish.sh 1.2.5 ~/Desktop/AnoawaV1.2.5.Apk ~/Desktop/AnoawaV1.2.5.zip --notes notes/1.2.5.md
 ```
+
+不带 `--notes` 也能发，只是说明里只有下载表格和校验和（1.2.2 及以前都是这样）。
+`--dry-run` 打印完整发布说明但不碰 GitHub，发之前先看一眼；`--draft` 先建成草稿。
 
 ## 相关仓库
 
